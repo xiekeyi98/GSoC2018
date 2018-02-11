@@ -12,39 +12,39 @@ struct node
 // update a node whose children are updated 
 inline void pushup( int root )
 {
-	segtree[root].value = segtree[root*2].value + segtree[root*2+1].value;
+	segtree[root].value = max( segtree[root*2].value , segtree[root*2+1].value ) ;
 }
 
 // update the node when query it  
-inline void pushdown( int root , int len ) 
+inline void pushdown( int root ) 
 {
 	if( segtree[root].lazytag )
 	{
 		segtree[root*2].lazytag = segtree[root].lazytag;
 		segtree[root*2+1].lazytag = segtree[root].lazytag ;
 
-		segtree[root*2].value = segtree[root].lazytag * ( len - len / 2 ) ;
-		segtree[root*2+1].value = segtree[root].lazytag * ( len / 2 ) ;
+		segtree[root*2].value += segtree[root].lazytag ;
+		segtree[root*2+1].value += segtree[root].lazytag ;
 
 		segtree[root].lazytag = 0 ;
 	}
 
 }
 
-void build( int root , int nstart , int nend )
+void build( int root , int a[],  int nstart , int nend )
 {
 	segtree[root].lazytag = 0;
 	if( nstart == nend )
 	{
-		segtree[root].value = 1 ; 
+		segtree[root].value = a[nstart] ; 
 		return ;
 	}
 
 
 	int mid = ( nstart + nend ) / 2 ;
 
-	build( root * 2 , nstart , mid );
-	build( root * 2 + 1 , mid + 1 , nend );
+	build( root * 2 , a , nstart , mid );
+	build( root * 2 + 1 , a,mid + 1 , nend );
 
 	pushup(root);
 }
@@ -58,12 +58,12 @@ void update( int root , int nstart , int nend , int ustart , int uend , int newm
 
 	if( nstart >= ustart && nend <= uend )
 	{
-		segtree[root].value = newmark * ( nend - nstart + 1 ) ;
+		segtree[root].value += newmark ;
 		segtree[root].lazytag = newmark;
 		return ; 
 	}
 
-	pushdown( root , nend - nstart + 1 ) ;
+	pushdown( root ) ;
 
 	int mid = ( nstart + nend ) / 2 ;
 
@@ -81,7 +81,7 @@ int query( int root , int nstart , int nend ,int qstart , int qend )
 	if( nstart >= qstart && nend <= qend )
 		return segtree[root].value ;
 
-	pushdown(root , nend - nstart + 1 );
+	pushdown(root); 
 
 	int mid = ( nstart + nend ) / 2 ;
 
@@ -97,33 +97,22 @@ int query( int root , int nstart , int nend ,int qstart , int qend )
 // TEST ;
 int main()
 {
-
-	int t ;
-	scanf("%d",&t);
-	int kase = 0 ;
-	while(t--)
+	int a[maxn];
+	int n ;
+	cin >> n ;
+	for( int i = 1 ; i <= n ; i++)
 	{
-		memset( segtree , 0 , sizeof(segtree) ) ; 
-		int n ;
-		scanf("%d",&n);
-
-		build( 1 , 1 , n ) ;
-
-		int q ;
-		scanf("%d",&q);
-
-		while(q--)
-		{
-			int x , y , z ;
-			scanf("%d%d%d",&x,&y,&z);
-			update( 1 , 1 , n ,  x , y , z ) ;
-
-		}
-
-		printf( "Case %d: The total value of the hook is %d.\n" , ++kase , query( 1 , 1 , n , 1 , n ) ) ; 
+		cin >> a[i] ;
 	}
 
-	return 0 ; 
+	build( 1 , a , 1 , n ) ;
+
+	cout << query( 1 , 1 , n , 1 ,n ) << endl ; 
+
+	update( 1 , 1 , n , 1 , 3 , 10 ) ;
+	cout << query( 1 , 1 , n , 1 ,n ) << endl ;
+
+
 }
 
 
