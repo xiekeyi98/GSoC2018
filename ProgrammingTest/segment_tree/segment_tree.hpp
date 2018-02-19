@@ -23,9 +23,13 @@ namespace st
 			segment_tree() {};
 			~segment_tree(){};
 			void build( std::vector<T> const & a , int root , int l , int r );
+			T query( int l , int r ) { query( 0 , l , r ) ; } ; 
+			void modify( int l , int r , T newmark ) {  modify( 0 , l , r , newmark ) ; } ;  
+
+		private:
+
 			T query( int root , int l , int r ) ;
 			void modify( int root , int l , int r , T newmark ) ;
-		private:
 			std::vector< node<T> > segtree ; 
 			bool uninit= true ; 
 			int INFINITE = -0x7fffffff; 
