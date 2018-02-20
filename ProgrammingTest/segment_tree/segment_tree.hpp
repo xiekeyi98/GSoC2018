@@ -3,10 +3,8 @@
 #include<memory>
 #include<vector>
 #include<algorithm>
+
 #ifdef DEBUG
-#include<iostream>
-#include<vector>
-#include<algorithm>
 using namespace std ;
 #endif // DEBUG 
 namespace st
@@ -16,18 +14,170 @@ namespace st
 		T value;
 		int l , r ; 
 		T lazytag; 
+		bool _lazytag = false; 
+	};
+
+	template< typename T  > 
+		class basic_operator
+		{
+			public:
+				virtual void pushup( std::vector<T> &segtree , int root ) = 0 ;
+				// 1 is to make a segment to be the number ;
+				// 2 is to make a segment to add the number;  
+				virtual void pushdown1( std::vector<T> &segtree,int root ) = 0 ; 
+				virtual void pushdown2( std::vector<T> &segtree,int root ) = 0 ; 
+			protected:
+				int left_child( int root ) const { return root * 2 + 1 ; } ;
+				int right_child(int root ) const { return root * 2 + 2 ; } ; 
+		};
+
+	template< typename T > 
+		class Max: public basic_operator<T> 
+	{
+		public:
+			T operator() ( const T &a , const T &b ) const { return std::max(a,b); } ; 
+			void pushup( std::vector<node<T>> &segtree , int root ) 
+			{
+				segtree[root].value = 
+					Max( segtree[this->left_child(root)].value , segtree[this->right_child(root)].value);
+				segtree[root].l = segtree[this->left_child(root)].l;
+				segtree[root].r = segtree[this->right_child(root)].r;
+			}
+
+			void pushdown1(std::vector<node<T>> &segtree , int root ) 
+			{
+				if( segtree[root]._lazytag)
+				{
+					segtree[this->left_child(root)].lazytag = segtree[root].lazytag;
+					segtree[this->left_child(root)].value = segtree[root].lazytag ;
+					segtree[this->right_child(root)].lazytag = segtree[root].lazytag;
+					segtree[this->right_child(root)].value = segtree[root].lazytag ;
+					segtree[root]._lazytag = false; 
+					segtree[root].lazytag = 0 ; 
+					// 0 is not a good INFINITE number , but I don't know what to do better .  
+				}
+			}
+
+			void pushdown2(std::vector<node<T>> &segtree , int root ) 
+			{
+				if( segtree[root]._lazytag)
+				{
+					segtree[this->left_child(root)].lazytag += segtree[root].lazytag;
+					segtree[this->left_child(root)].value += segtree[root].lazytag ;
+					segtree[this->right_child(root)].lazytag += segtree[root].lazytag;
+					segtree[this->right_child(root)].value += segtree[root].lazytag ;
+					segtree[root]._lazytag = false; 
+					segtree[root].lazytag = 0 ; 
+				}
+			}
+	};
+
+	template< typename T > 
+		class Min: public basic_operator<T> 
+	{
+		public:
+			T operator() ( const T &a , const T &b ) const { return std::min(a,b); } ; 
+			void pushup( std::vector<node<T>> &segtree , int root ) 
+			{
+				segtree[root].value = 
+					Min( segtree[this->left_child(root)].value , 
+							segtree[this->right_child(root)].value);
+				segtree[root].l = segtree[this->left_child(root)].l;
+				segtree[root].r = segtree[this->right_child(root)].r;
+			}
+
+			void pushdown1(std::vector<node<T>> &segtree , int root ) 
+			{
+				if( segtree[root]._lazytag)
+				{
+					segtree[this->left_child(root)].lazytag = segtree[root].lazytag;
+					segtree[this->left_child(root)].value = segtree[root].lazytag ;
+					segtree[this->right_child(root)].lazytag = segtree[root].lazytag;
+					segtree[this->right_child(root)].value = segtree[root].lazytag ;
+					segtree[root]._lazytag = false; 
+					segtree[root].lazytag = 0 ; 
+				}
+			}
+
+			void pushdown2(std::vector<node<T>> &segtree , int root ) 
+			{
+				if( segtree[root]._lazytag)
+				{
+					segtree[this->left_child(root)].lazytag += segtree[root].lazytag;
+					segtree[this->left_child(root)].value += segtree[root].lazytag ;
+					segtree[this->right_child(root)].lazytag += segtree[root].lazytag;
+					segtree[this->right_child(root)].value += segtree[root].lazytag ;
+					segtree[root]._lazytag = false; 
+					segtree[root].lazytag = 0 ; 
+				}
+			}
+	};
+
+	template< typename T > 
+		class Plus: public basic_operator<T> 
+	{
+		public:
+			T operator() ( const T &a , const T &b ) const { return a + b ;} ; 
+			void pushup( std::vector<node<T>> &segtree , int root ) 
+			{
+				segtree[root].value = 
+					Plus( segtree[this->left_child(root)].value , 
+							segtree[this->right_child(root)].value);
+				segtree[root].l = segtree[this->left_child(root)].l;
+				segtree[root].r = segtree[this->right_child(root)].r;
+			}
+
+			void pushdown1(std::vector<node<T>> &segtree , int root ) 
+			{
+				if( segtree[root]._lazytag)
+				{
+					segtree[this->left_child(root)].lazytag = segtree[root].lazytag;
+					// solve the closed interval ;
+					segtree[this->left_child(root)].value = 
+						segtree[root].lazytag * 
+						(segtree[this->left_child(root)].r - 
+						 segtree[this->left_child(root)].l + 1 ) ;
+					segtree[this->right_child(root)].lazytag = segtree[root].lazytag;
+					segtree[this->right_child(root)].value =
+						segtree[root].lazytag * 
+						(segtree[this->right_child(root)].r - 
+						 segtree[this->right_child(root)].l + 1 ) ;
+					segtree[root]._lazytag = false; 
+					segtree[root].lazytag = 0 ; 
+				}
+			}
+
+			void pushdown2(std::vector<node<T>> &segtree , int root ) 
+			{
+				if( segtree[root]._lazytag)
+				{
+					segtree[this->left_child(root)].lazytag += segtree[root].lazytag;
+					segtree[this->left_child(root)].value += 
+						segtree[root].lazytag * 
+						(segtree[this->left_child(root)].r - 
+						 segtree[this->left_child(root)].l + 1 ) ;
+					segtree[this->right_child(root)].lazytag += segtree[root].lazytag;
+					segtree[this->right_child(root)].value += 
+						segtree[root].lazytag * 
+						(segtree[this->right_child(root)].r - 
+						 segtree[this->right_child(root)].l + 1 ) ;
+					segtree[root]._lazytag = false; 
+					segtree[root].lazytag = 0 ; 
+				}
+			}
 	};
 	template <typename T> class segment_tree
 	{
 		public:
+			friend class Max<T>;
 			segment_tree() {};
-			~segment_tree(){};
+			~segment_tree(){ segtree.resize(0);}// maybe this is unnecessary?
+
 			void build( std::vector<T> const & a , int root , int l , int r );
 			T query( int l , int r ) { query( 0 , l , r ) ; } ; 
 			void modify( int l , int r , T newmark ) {  modify( 0 , l , r , newmark ) ; } ;  
 
 		private:
-
 			T query( int root , int l , int r ) ;
 			void modify( int root , int l , int r , T newmark ) ;
 			std::vector< node<T> > segtree ; 
@@ -35,26 +185,26 @@ namespace st
 			int INFINITE = -0x7fffffff; 
 			inline int left_child(int root) const { return root * 2 + 1 ; };
 			inline int right_child(int root)const { return root * 2 + 2 ; } ; 
-			void pushup( int root )
-			{
-				segtree[root].value = 
-					std::max( segtree[left_child(root)].value , segtree[right_child(root)].value);
-				segtree[root].l = segtree[left_child(root)].l;
-				segtree[root].r = segtree[right_child(root)].r;
-			}
+	//		void pushup( int root )
+	//		{
+	//			segtree[root].value = 
+	//				std::max( segtree[left_child(root)].value , segtree[right_child(root)].value);
+	//			segtree[root].l = segtree[left_child(root)].l;
+	//			segtree[root].r = segtree[right_child(root)].r;
+	//		}
 
-			void pushdown( int root )
-			{
-				if( segtree[root].lazytag )
-				{
-					segtree[left_child(root)].lazytag = segtree[root].lazytag;
-					segtree[left_child(root)].value = segtree[root].lazytag ;
-					segtree[right_child(root)].lazytag = segtree[root].lazytag;
-					segtree[right_child(root)].value = segtree[root].lazytag ;
-					segtree[root].lazytag = 0 ; 
-				}
+	//		void pushdown( int root )
+	//		{
+	//			if( segtree[root].lazytag )
+	//			{
+	//				segtree[left_child(root)].lazytag = segtree[root].lazytag;
+	//				segtree[left_child(root)].value = segtree[root].lazytag ;
+	//				segtree[right_child(root)].lazytag = segtree[root].lazytag;
+	//				segtree[right_child(root)].value = segtree[root].lazytag ;
+	//				segtree[root].lazytag = 0 ; 
+	//			}
 
-			}
+	//		}
 	};
 	template<typename T > 
 		void segment_tree<T>::build( std::vector<T> const &a , int root , int l , int r )  
@@ -113,6 +263,7 @@ namespace st
 			if( segtree[root].l >= l && segtree[root].r <= r )
 			{
 				segtree[root].lazytag = newmark;
+				segtree[root]._lazytag = true ; 
 				segtree[root].value = newmark;
 			}
 
