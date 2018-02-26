@@ -195,14 +195,14 @@ namespace st
 		public:
 			segment_tree() {};
 			~segment_tree(){ segtree.resize(0);}// TODO maybe this is unnecessary?
-			void build( std::vector<T1> const & a , int root , int l , int r );
+			void build( std::vector<T1> const & a , int l , int r ){ build( a , 0 , l , r ) ; } ;
 			T1 query( int l , int r ) { return query( 0 , l , r ) ; } ; 
 			void modify1( int l , int r , T1 newmark ) {  modify1( 0 , l , r , newmark ) ; } ;  
 
 		private:
 			T1 query( int root , int l , int r ) ;
+			void build( std::vector<T1> const & a , int root , int l , int r );
 			void modify1( int root , int l , int r , T1 newmark ) ;
-			void modify2( int root , int l , int r , T1 newmark ) ;
 			std::vector< node<T1> > segtree ; 
 			T2 _operator ; 
 			bool uninit= true ; 

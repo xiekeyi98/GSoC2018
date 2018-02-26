@@ -11,7 +11,7 @@ int main()
 		a.push_back(i);
 	}
 //	segment_tree< int , Max<int> > st ;
-//	st.build( a , 0 , 0 , 9 ) ;
+//	st.build( a , 0 , 9 ) ;
 //	cout << st.query( 0 , 0 ) << endl ;
 //	cout << st.query( 5 , 5 ) << endl ;
 //	cout << st.query( 0 , 9 ) << endl ;
@@ -22,7 +22,7 @@ int main()
 //	cout << "*****" << endl ; 
 //	segment_tree< int , Min<int> > st2;
 //
-//	st2.build( a , 0 , 0 , 9 ) ; 
+//	st2.build( a ,0 , 9 ) ; 
 //	cout << st2.query( 0 , 0 ) << endl ; 
 //	cout << st2.query( 1 , 1 ) << endl ; 
 //	cout << st2.query( 0 , 9 ) << endl ; 
@@ -35,7 +35,7 @@ int main()
 //
 //	cout << "*****" << endl ; 
 	segment_tree< int , Plus<int> > st3;
-	st3.build( a , 0 , 0 , 9 ) ; 
+	st3.build( a , 0 , 9 ) ; 
 //	cout << st3.query( 0 , 0 ) << endl ;
 //	cout << st3.query( 5 , 5 ) << endl ;
 //	cout << st3.query( 0 , 9 ) << endl ;
