@@ -22,6 +22,7 @@ namespace st
 				virtual void pushdown1( std::vector<node<T>> &segtree,int root ) = 0 ; 
 				int left_child( int root ) const { return root * 2 + 1 ; } ;
 				int right_child(int root ) const { return root * 2 + 2 ; } ; 
+				virtual T newvalue( T newmark , const node<T> &root) const { return newmark ; } ; 
 		};
 
 	template< typename T > 
@@ -156,9 +157,8 @@ namespace st
 					return b ;
 				else if( a != INFINITE && b == INFINITE )
 					return a ;
-				else if( a == INFINITE && b == INFINITE )
-					;
-				return INFINITE ; 
+				else 
+					return INFINITE ; 
 			}
 			void pushup( std::vector<node<T>> &segtree , int root ) 
 			{
@@ -168,25 +168,33 @@ namespace st
 				segtree[root].l = segtree[this->left_child(root)].l;
 				segtree[root].r = segtree[this->right_child(root)].r;
 			}
-
 			void pushdown1(std::vector<node<T>> &segtree , int root ) 
 			{
-				if( segtree[root]._lazytag && segtree[root].r - segtree[root].l > 1 )
+				if( segtree[root]._lazytag && segtree[root].r - segtree[root].l  + 1 >= 1 )
 				{
 					segtree[this->left_child(root)].lazytag += segtree[root].lazytag;
+
 					// solve the closed interval ;
+
 					segtree[this->left_child(root)].value += 
 						segtree[root].lazytag * 
 						(segtree[this->left_child(root)].r - 
 						 segtree[this->left_child(root)].l + 1 ) ;
+
 					segtree[this->right_child(root)].lazytag += segtree[root].lazytag;
 					segtree[this->right_child(root)].value +=
 						segtree[root].lazytag * 
 						(segtree[this->right_child(root)].r - 
 						 segtree[this->right_child(root)].l + 1 ) ;
+
 					segtree[root]._lazytag = false; 
 					segtree[root].lazytag = 0 ; 
 				}
+			}
+
+			T newvalue( T newmark , const node<T> &root ) const override
+			{
+				return newmark*(root.r - root.l + 1 ) ; 
 			}
 
 	};
@@ -269,7 +277,7 @@ namespace st
 			{
 				segtree[root]._lazytag = true ; 
 				segtree[root].lazytag += newmark;
-				segtree[root].value += newmark;
+				segtree[root].value += _operator.newvalue( newmark , segtree[root] ) ;
 				return ; 
 			}
 			else if( segtree[root].l > r || segtree[root].r < l )
